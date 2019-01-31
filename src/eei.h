@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <cstdint>
+#include <string>
 #include <vector>
 
 #include <evmc/evmc.h>
@@ -23,6 +25,9 @@
 #include "exceptions.h"
 
 namespace hera {
+
+using bytes = std::basic_string<uint8_t>;
+using bytes_view = std::basic_string_view<uint8_t>;
 
 struct ExecutionResult {
   int64_t gasLeft = 0;
@@ -53,13 +58,13 @@ class EthereumInterface {
 public:
   explicit EthereumInterface(
     evmc_context* _context,
-    std::vector<uint8_t> const& _code,
+    std::vector<uint8_t> const& _code,  // TODO: Change arg type to bytes or bytes_view.
     evmc_message const& _msg,
     ExecutionResult & _result,
     bool _meterGas
   ):
     m_context(_context),
-    m_code(_code),
+    m_code{_code.begin(), _code.end()},
     m_msg(_msg),
     m_result(_result),
     m_meterGas(_meterGas)
@@ -149,7 +154,7 @@ private:
   void loadMemory(uint32_t srcOffset, std::vector<uint8_t> & dst, size_t length);
   void storeMemoryReverse(const uint8_t *src, uint32_t dstOffset, uint32_t length);
   void storeMemory(const uint8_t *src, uint32_t dstOffset, uint32_t length);
-  void storeMemory(std::vector<uint8_t> const& src, uint32_t srcOffset, uint32_t dstOffset, uint32_t length);
+  void storeMemory(bytes_view src, uint32_t srcOffset, uint32_t dstOffset, uint32_t length);
 
   evmc_uint256be loadBytes32(uint32_t srcOffset);
   void storeBytes32(evmc_uint256be const& src, uint32_t dstOffset);
@@ -171,9 +176,9 @@ private:
 
   evmc_tx_context m_tx_context{};
   evmc_context* m_context = nullptr;
-  std::vector<uint8_t> const& m_code;
+  bytes m_code;
   evmc_message const& m_msg;
-  std::vector<uint8_t> m_lastReturnData;
+  bytes m_lastReturnData;
   ExecutionResult & m_result;
   bool m_meterGas = true;
 };

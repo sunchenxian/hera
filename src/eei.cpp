@@ -199,8 +199,7 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
 
       safeChargeDataCopy(length, GasSchedule::verylow);
 
-      vector<uint8_t> input(m_msg.input_data, m_msg.input_data + m_msg.input_size);
-      storeMemory(input, dataOffset, resultOffset, length);
+      storeMemory({m_msg.input_data, m_msg.input_size}, dataOffset, resultOffset, length);
   }
 
   void EthereumInterface::eeiGetCaller(uint32_t resultOffset)
@@ -246,8 +245,9 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
       safeChargeDataCopy(length, GasSchedule::extcode);
 
       evmc_address address = loadAddress(addressOffset);
-      // TODO: optimise this so no vector needs to be created
-      vector<uint8_t> codeBuffer(length);
+      // TODO: optimise this so no copy needs to be created
+      bytes codeBuffer;
+      codeBuffer.resize(length);
       size_t numCopied = m_context->host->copy_code(m_context, &address, codeOffset, codeBuffer.data(), codeBuffer.size());
       ensureCondition(numCopied == length, InvalidMemoryAccess, "Out of bounds (source) memory copy");
 
@@ -733,7 +733,7 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
     }
   }
 
-  void EthereumInterface::storeMemory(vector<uint8_t> const& src, uint32_t srcOffset, uint32_t dstOffset, uint32_t length)
+  void EthereumInterface::storeMemory(bytes_view src, uint32_t srcOffset, uint32_t dstOffset, uint32_t length)
   {
     ensureCondition((srcOffset + length) >= srcOffset, InvalidMemoryAccess, "Out of bounds (source) memory copy.");
     ensureCondition(src.size() >= (srcOffset + length), InvalidMemoryAccess, "Out of bounds (source) memory copy.");
