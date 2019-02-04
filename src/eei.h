@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <vector>
 
 #include <evmc/evmc.h>
@@ -29,6 +30,8 @@ struct ExecutionResult {
   std::vector<uint8_t> returnValue;
   bool isRevert = false;
 };
+
+
 
 // There is a single engine instance in each VM instance and
 // likely execute() is called multiple times. As a result
@@ -47,6 +50,35 @@ public:
   ) = 0;
 
   virtual void verifyContract(std::vector<uint8_t> const& code) = 0;
+
+  static void enableBenchmarking() noexcept { benchmarkingEnabled = true; }
+
+protected:
+  void instantiationStarted() noexcept
+  {
+    if (benchmarkingEnabled)
+      instantiationStartTime = clock::now();
+  }
+
+  void executionStarted() noexcept
+  {
+    if (benchmarkingEnabled)
+      executionStartTime = clock::now();
+  }
+
+  void executionFinished()
+  {
+    if (benchmarkingEnabled)
+      collectBenchmarkingData();
+  }
+
+private:
+  void collectBenchmarkingData();
+
+  using clock = std::chrono::high_resolution_clock;
+  static bool benchmarkingEnabled;
+  clock::time_point instantiationStartTime;
+  clock::time_point executionStartTime;
 };
 
 class EthereumInterface {
