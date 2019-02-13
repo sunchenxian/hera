@@ -326,7 +326,7 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
       topics[3] = (numberOfTopics == 4) ? loadBytes32(topic4) : evmc_uint256be{};
 
       ensureSourceMemoryBounds(dataOffset, length);
-      vector<uint8_t> data(length);
+      bytes data(length, 0);
       loadMemory(dataOffset, data, length);
 
       m_context->host->emit_log(m_context, &m_msg.destination, data.data(), length, topics.data(), numberOfTopics);
@@ -407,7 +407,7 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
       HERA_DEBUG << depthToString() << " " << (revert ? "revert " : "finish ") << hex << offset << " " << size << dec << "\n";
 
       ensureSourceMemoryBounds(offset, size);
-      m_result.returnValue = vector<uint8_t>(size);
+      m_result.returnValue = bytes(size, 0);
       loadMemory(offset, m_result.returnValue, size);
 
       m_result.isRevert = revert;
@@ -486,7 +486,7 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
 #endif
 
       // NOTE: this must be declared outside the condition to ensure the memory doesn't go out of scope
-      vector<uint8_t> input_data;
+      bytes input_data;
       if (dataLength) {
         ensureSourceMemoryBounds(dataOffset, dataLength);
         input_data.resize(dataLength);
@@ -574,7 +574,7 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
         return 1;
 
       // NOTE: this must be declared outside the condition to ensure the memory doesn't go out of scope
-      vector<uint8_t> contract_code;
+      bytes contract_code;
       if (length) {
         ensureSourceMemoryBounds(dataOffset, length);
         contract_code.resize(length);
@@ -692,7 +692,7 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
     }
   }
 
-  void EthereumInterface::loadMemory(uint32_t srcOffset, vector<uint8_t> & dst, size_t length)
+  void EthereumInterface::loadMemory(uint32_t srcOffset, bytes& dst, size_t length)
   {
     // NOTE: the source bound check is not needed as the caller already ensures it
     ensureCondition((srcOffset + length) >= srcOffset, InvalidMemoryAccess, "Out of bounds (source) memory copy.");
