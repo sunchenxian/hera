@@ -23,11 +23,9 @@
 #include <evmc/evmc.h>
 
 #include "exceptions.h"
+#include "helpers.h"
 
 namespace hera {
-
-using bytes = std::basic_string<uint8_t>;
-using bytes_view = std::basic_string_view<uint8_t>;
 
 struct ExecutionResult {
   int64_t gasLeft = 0;
