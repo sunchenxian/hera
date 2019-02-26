@@ -246,8 +246,7 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
 
       evmc_address address = loadAddress(addressOffset);
       // TODO: optimise this so no copy needs to be created
-      bytes codeBuffer;
-      codeBuffer.resize(length);
+      bytes codeBuffer(length, 0);
       size_t numCopied = m_context->host->copy_code(m_context, &address, codeOffset, codeBuffer.data(), codeBuffer.size());
       ensureCondition(numCopied == length, InvalidMemoryAccess, "Out of bounds (source) memory copy");
 
