@@ -146,7 +146,7 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
 
   int64_t EthereumInterface::eeiGetGasLeft()
   {
-      HERA_DEBUG << depthToString() << " getGasLeft\n";
+      HERA_DEBUG << depthToString() << " getGasLeft " << m_result.gasLeft << "\n";
 
       static_assert(is_same<decltype(m_result.gasLeft), int64_t>::value, "int64_t type expected");
 
@@ -678,15 +678,12 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
   }
 
   void EthereumInterface::eeiGetBlockGasLimit(uint32_t dstOffset) {
-      HERA_DEBUG << depthToString() << " get block gas limit offset " << hex << dstOffset << "\n";
+      HERA_DEBUG << depthToString() << " get block gas limit offset " << hex << dstOffset << ", gas_limit " << m_tx_context.block_gas_limit << dec << "\n";
+      takeInterfaceGas(GasSchedule::base);
 
       //storeBytes32( convertToBytes32( m_tx_context.block_gas_limit ), dstOffset );
       storeUint256( convertToBytes32( m_tx_context.block_gas_limit ), dstOffset );
   }
-
-  /*int64_t EthereumInterface::eeiGetGasLeft(uint32_t resultOffset) {
-
-  }*/
 
   void EthereumInterface::eeiPanic( uint32_t payloadOffset, uint32_t payloadLength ) {
     HERA_DEBUG << depthToString() << " panic payloadOffset " << hex << "0x" << payloadOffset << ", payloadLength " << payloadLength << dec << "\n";
@@ -694,7 +691,6 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
 
   void EthereumInterface::takeGas(int64_t gas)
   {
-    //HERA_DEBUG << "takeGas " << m_result.gasLeft << ", " << gas << "\n";
     // NOTE: gas >= 0 is validated by the callers of this method
     if ( gas > m_result.gasLeft ) {
       HERA_DEBUG << "gas is " << gas << ", gasLeft " << m_result.gasLeft << "\n";
@@ -834,7 +830,7 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
 
 #if HERA_DEBUGGING
       for ( size_t i = 0; i < sz; ++i ) {
-          HERA_DEBUG << dst.bytes[i] << " ";
+          HERA_DEBUG << static_cast<int>( dst.bytes[i] ) << " ";
       }
 
       HERA_DEBUG << "\n";
