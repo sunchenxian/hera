@@ -879,13 +879,13 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
   evmc_address EthereumInterface::loadAddress(uint32_t srcOffset)
   {
     evmc_address dst = {};
-    loadMemory(srcOffset, dst.bytes, 20);
+    loadMemory(srcOffset, dst.bytes, 21);
     return dst;
   }
 
   void EthereumInterface::storeAddress(evmc_address const& src, uint32_t dstOffset)
   {
-    storeMemory(src.bytes, dstOffset, 20);
+    storeMemory(src.bytes, dstOffset, 21);
   }
 
   evmc_asset EthereumInterface::loadAsset( uint32_t srcOffset ) {
