@@ -74,7 +74,6 @@ private:
   void BinaryenEthereumInterface::importGlobals(map<wasm::Name, wasm::Literal>& globals, wasm::Module& wasm) {
     (void)globals;
     (void)wasm;
-    HERA_DEBUG << "importGlobals\n";
   }
 
 #if HERA_DEBUGGING
@@ -135,7 +134,7 @@ private:
       return wasm::Literal();
     }
 
-    heraAssert(false, string("Unsupported import called: ") + import->module.str + "::" + import->base.str + " (" + to_string(arguments.size()) + " arguments)");
+    heraAssert(false, string("Unsupported1 import called: ") + import->module.str + "::" + import->base.str + " (" + to_string(arguments.size()) + " arguments)");
   }
 #endif
 
@@ -462,12 +461,12 @@ private:
           eeiSelfDestruct(addressOffset);
       }
 
-      heraAssert(false, string("1 Unsupported import called: ") + import->module.str + "::" + import->base.str + " (" + to_string(arguments.size()) + " arguments)");
+      heraAssert(false, string("1 Unsupported2 import called: ") + import->module.str + "::" + import->base.str + " (" + to_string(arguments.size()) + " arguments)");
   }
 
   // add by csun import rust api
   wasm::Literal BinaryenEthereumInterface::callImportFromEnv( wasm::Import *import, wasm::LiteralList& arguments ) {
-      HERA_DEBUG << "call bninary env interface " << import->base << ", argument size is " << arguments.size() << "\n";
+      HERA_DEBUG << "call binary env interface " << import->base << ", argument size is " << arguments.size() << "\n";
 
       if (import->base == wasm::Name("input_length")) {
           heraAssert(arguments.size() == 0, string("Argument count mismatch in: ") + import->base.str);
@@ -753,13 +752,13 @@ private:
 
           heraAssert(arguments.size() == 2, string("Argument count mismatch in: ") + import->base.str);
 
-          /*uint32_t offset = static_cast<uint32_t>(arguments[0].geti32());
+          uint32_t offset = static_cast<uint32_t>(arguments[0].geti32());
           uint32_t size = static_cast<uint32_t>(arguments[1].geti32());
 
-          eeiRevert(offset, size);*/
+          eeiRevert(offset, size);
       }
 
-      heraAssert(false, string("1 Unsupported import called: ") + import->module.str + "::" + import->base.str + " (" + to_string(arguments.size()) + " arguments)");
+      heraAssert(false, string("1 Unsupported3 import called: ") + import->module.str + "::" + import->base.str + " (" + to_string(arguments.size()) + " arguments)");
   }
 
   wasm::Literal BinaryenEthereumInterface::callImport(wasm::Import *import, wasm::LiteralList& arguments) {
