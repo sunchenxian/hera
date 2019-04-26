@@ -158,10 +158,11 @@ ExecutionResult WabtEngine::execute(
       const interp::TypedValues& args,
       interp::TypedValues& results
     ) {
+      // eeiCall add a param asset at args[3]
       results[0].set_i32(interface.eeiCall(
         EthereumInterface::EEICallKind::Call,
         static_cast<int64_t>(args[0].value.i64), args[1].value.i32,
-        args[2].value.i32, args[3].value.i32, args[4].value.i32
+        args[2].value.i32, 0, args[3].value.i32, args[4].value.i32
       ));
       return interp::Result::Ok;
     }
@@ -207,7 +208,7 @@ ExecutionResult WabtEngine::execute(
       results[0].set_i32(interface.eeiCall(
         EthereumInterface::EEICallKind::CallCode,
         static_cast<int64_t>(args[0].value.i64), args[1].value.i32,
-        args[2].value.i32, args[3].value.i32, args[4].value.i32
+        args[2].value.i32, 0, args[3].value.i32, args[4].value.i32
       ));
       return interp::Result::Ok;
     }
@@ -224,7 +225,7 @@ ExecutionResult WabtEngine::execute(
     ) {
       results[0].set_i32(interface.eeiCall(
         EthereumInterface::EEICallKind::CallDelegate,
-        static_cast<int64_t>(args[0].value.i64), args[1].value.i32, 0,
+        static_cast<int64_t>(args[0].value.i64), args[1].value.i32, 0, 0,
         args[2].value.i32, args[3].value.i32
       ));
       return interp::Result::Ok;
@@ -242,7 +243,7 @@ ExecutionResult WabtEngine::execute(
     ) {
       results[0].set_i32(interface.eeiCall(
         EthereumInterface::EEICallKind::CallStatic,
-        static_cast<int64_t>(args[0].value.i64), args[1].value.i32, 0,
+        static_cast<int64_t>(args[0].value.i64), args[1].value.i32, 0, 0,
         args[2].value.i32, args[3].value.i32
       ));
       return interp::Result::Ok;

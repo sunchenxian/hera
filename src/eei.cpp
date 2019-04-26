@@ -443,9 +443,9 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
       storeMemory(m_lastReturnData, offset, dataOffset, size);
   }
 
-  uint32_t EthereumInterface::eeiCall(EEICallKind kind, int64_t gas, uint32_t addressOffset, uint32_t valueOffset, uint32_t dataOffset, uint32_t dataLength)
+  uint32_t EthereumInterface::eeiCall(EEICallKind kind, int64_t gas, uint32_t addressOffset, uint32_t valueOffset, uint32_t assetOffset, uint32_t dataOffset, uint32_t dataLength)
   {
-      HERA_DEBUG << "call other contract " << gas << "\n" ;
+      HERA_DEBUG << "call other contract " << gas << "\n";
 
       // add by csun TODO ???
       // Gas value may be -1
@@ -465,6 +465,7 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
         call_message.kind = (kind == EEICallKind::CallCode) ? EVMC_CALLCODE : EVMC_CALL;
         call_message.sender = m_msg.destination;
         call_message.value = loadUint128(valueOffset);
+        call_message.asset = loadAsset(assetOffset);
 
         if ((kind == EEICallKind::Call) && !is_zero(call_message.value)) {
           ensureCondition(!(m_msg.flags & EVMC_STATIC), StaticModeViolation, "call");
@@ -885,6 +886,16 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
   void EthereumInterface::storeAddress(evmc_address const& src, uint32_t dstOffset)
   {
     storeMemory(src.bytes, dstOffset, 20);
+  }
+
+  evmc_asset EthereumInterface::loadAsset( uint32_t srcOffset ) {
+    evmc_asset dst = {};
+    loadMemory( srcOffset, dst.bytes, 12 );
+    return dst;
+  }
+
+  void EthereumInterface::storeAsset( evmc_asset const& src, uint32_t dstOffset ) {
+    storeMemory( src.bytes, dstOffset, 12 );
   }
 
   evmc_uint256be EthereumInterface::loadUint128(uint32_t srcOffset)

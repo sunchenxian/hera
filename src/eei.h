@@ -128,7 +128,7 @@ protected:
   void eeiRevert(uint32_t offset, uint32_t size) { eeiRevertOrFinish(true, offset, size); }
   uint32_t eeiGetReturnDataSize();
   void eeiReturnDataCopy(uint32_t dataOffset, uint32_t offset, uint32_t size);
-  uint32_t eeiCall(EEICallKind kind, int64_t gas, uint32_t addressOffset, uint32_t valueOffset, uint32_t dataOffset, uint32_t dataLength);
+  uint32_t eeiCall(EEICallKind kind, int64_t gas, uint32_t addressOffset, uint32_t valueOffset, uint32_t assetOffset, uint32_t dataOffset, uint32_t dataLength);
   uint32_t eeiCreate(uint32_t valueOffset, uint32_t dataOffset, uint32_t length, uint32_t resultOffset);
   void eeiSelfDestruct(uint32_t addressOffset);
 
@@ -165,6 +165,9 @@ private:
   void storeAddress(evmc_address const& src, uint32_t dstOffset);
   evmc_uint256be loadUint128(uint32_t srcOffset);
   void storeUint128(evmc_uint256be const& src, uint32_t dstOffset);
+
+  evmc_asset loadAsset( uint32_t srcOffset );
+  void storeAsset( evmc_asset const& src, uint32_t dstOffset );
 
   evmc_uint256be convertToBytes32( int64_t val );
 

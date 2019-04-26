@@ -415,7 +415,7 @@ private:
           heraAssert(false, "");
 
           if ((kind == EEICallKind::Call) || (kind == EEICallKind::CallCode)) {
-              heraAssert(arguments.size() == 5, string("Argument count mismatch in: ") + import->base.str);
+              heraAssert(arguments.size() == 6, string("Argument count mismatch in: ") + import->base.str);
           } else {
               heraAssert(arguments.size() == 4, string("Argument count mismatch in: ") + import->base.str);
           }
@@ -423,20 +423,23 @@ private:
           int64_t gas = arguments[0].geti64();
           uint32_t addressOffset = static_cast<uint32_t>(arguments[1].geti32());
           uint32_t valueOffset;
+          uint32_t assetOffset;  // custom instruction TODO add asset in pos 3 ???
           uint32_t dataOffset;
           uint32_t dataLength;
 
           if (kind == EEICallKind::Call || kind == EEICallKind::CallCode) {
               valueOffset = static_cast<uint32_t>(arguments[2].geti32());
-              dataOffset = static_cast<uint32_t>(arguments[3].geti32());
-              dataLength = static_cast<uint32_t>(arguments[4].geti32());
+              assetOffset = static_cast<uint32_t>(arguments[3].geti32());
+              dataOffset = static_cast<uint32_t>(arguments[4].geti32());
+              dataLength = static_cast<uint32_t>(arguments[5].geti32());
           } else {
               valueOffset = 0;
+              assetOffset = 0;
               dataOffset = static_cast<uint32_t>(arguments[2].geti32());
               dataLength = static_cast<uint32_t>(arguments[3].geti32());
           }
 
-          return wasm::Literal(eeiCall(kind, gas, addressOffset, valueOffset, dataOffset, dataLength));
+          return wasm::Literal(eeiCall(kind, gas, addressOffset, valueOffset, assetOffset, dataOffset, dataLength));
       }
 
       if (import->base == wasm::Name("create")) {
@@ -657,6 +660,14 @@ private:
           return wasm::Literal( eeiGetGasLeft() );
       }
 
+      // custom instruction TODO add flowAssetType
+
+      // custom instruction TODO add flowCreateAsset
+
+      // custom instruction TODO add flowMintAsset
+
+      // custom instrcution TODO add flowDeployContract
+
 
       // TODO need test ???
       if (import->base == wasm::Name("ccall") ||
@@ -674,7 +685,7 @@ private:
           heraAssert(false, "");
 
           if (kind == EEICallKind::Call) {
-              heraAssert(arguments.size() == 7, string("Argument count mismatch in: ") + import->base.str);
+              heraAssert(arguments.size() == 8, string("Argument count mismatch in: ") + import->base.str);
           } else {
               heraAssert(arguments.size() == 6, string("Argument count mismatch in: ") + import->base.str);
           }
@@ -682,6 +693,7 @@ private:
           int64_t gas = arguments[0].geti64();
           uint32_t addressOffset = static_cast<uint32_t>(arguments[1].geti32());
           uint32_t valueOffset;
+          uint32_t assetOffset;  // custom instruction TODO add asset in pos 3 ???
           uint32_t dataOffset;
           uint32_t dataLength;
 
@@ -691,19 +703,21 @@ private:
 
           if (kind == EEICallKind::Call || kind == EEICallKind::CallCode) {
               valueOffset = static_cast<uint32_t>(arguments[2].geti32());
-              dataOffset = static_cast<uint32_t>(arguments[3].geti32());
-              dataLength = static_cast<uint32_t>(arguments[4].geti32());
-              resultOffset = static_cast<uint32_t>(arguments[5].geti32());
-              resultLength = static_cast<uint32_t>(arguments[6].geti32());
+              assetOffset = static_cast<uint32_t>(arguments[3].geti32());
+              dataOffset = static_cast<uint32_t>(arguments[4].geti32());
+              dataLength = static_cast<uint32_t>(arguments[5].geti32());
+              resultOffset = static_cast<uint32_t>(arguments[6].geti32());
+              resultLength = static_cast<uint32_t>(arguments[7].geti32());
           } else {
               valueOffset = 0;
+              assetOffset = 0;
               dataOffset = static_cast<uint32_t>(arguments[2].geti32());
               dataLength = static_cast<uint32_t>(arguments[3].geti32());
               resultOffset = static_cast<uint32_t>(arguments[4].geti32());
               resultLength = static_cast<uint32_t>(arguments[5].geti32());
           }
 
-          return wasm::Literal(eeiCall(kind, gas, addressOffset, valueOffset, dataOffset, dataLength));
+          return wasm::Literal(eeiCall(kind, gas, addressOffset, valueOffset, assetOffset, dataOffset, dataLength));
       }
 
       // create2 is not supported
