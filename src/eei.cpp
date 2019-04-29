@@ -690,8 +690,8 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
     HERA_DEBUG << depthToString() << " panic payloadOffset " << hex << "0x" << payloadOffset << ", payloadLength " << payloadLength << dec << "\n";
   }
 
-  void EthereumInterface::eeiGetAsset( uint32_t resultOffset ) {
-      HERA_DEBUG << depthToString() << " getAsset " << hex << resultOffset << dec << "\n";
+  void EthereumInterface::eeiGetAsset() {
+      HERA_DEBUG << depthToString() << " getAsset " << "\n";
 
       //takeInterfaceGas(GasSchedule::base);
 

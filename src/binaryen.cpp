@@ -670,11 +670,11 @@ private:
 
       // custom instruction TODO add get_asset
       if (import->base == wasm::Name( "get_asset" )) {
-          heraAssert( arguments.size() == 1, string("Argument count mismatch in: ") + import->base.str );
+          heraAssert( arguments.size() == 0, string("Argument count mismatch in: ") + import->base.str );
 
-          uint32_t resultOffset = static_cast<uint32_t>( arguments[0].geti32() );
+          //uint32_t resultOffset = static_cast<uint32_t>( arguments[0].geti32() );
 
-          eeiGetAsset( resultOffset );
+          eeiGetAsset();
           return wasm::Literal();
       }
 
@@ -686,11 +686,19 @@ private:
           return wasm::Literal();
       }
 
-      // custom instruction TODO add mintasset
+      // custom instruction TODO add mint_asset
       if (import->base == wasm::Name( "mint_asset" )) {
           heraAssert( arguments.size() == 0, string("Argument count mismatch in: ") + import->base.str );
 
           eeiMintAsset();
+          return wasm::Literal();
+      }
+
+      // custom instruction TODO add transfer
+      if (import->base == wasm::Name( "transfer" ) ) {
+          heraAssert( arguments.size() == 0, string("Argument count mismatch in: ") + import->base.str );
+
+          eeiTransfer();
           return wasm::Literal();
       }
 
@@ -1066,7 +1074,7 @@ void BinaryenEngine::verifyContractOfExportCall( wasm::Module &module ) {
 
             // custom instructions
             { wasm::Name("test"), createFunctionType({ wasm::Type::i32 }, wasm::Type::none) },
-            { wasm::Name("get_asset"), createFunctionType({ wasm::Type::i32 }, wasm::Type::none) },
+            { wasm::Name("get_asset"), createFunctionType( {}, wasm::Type::none) },
             { wasm::Name("create_asset"), createFunctionType( {}, wasm::Type::none ) },
             { wasm::Name("mint_asset"), createFunctionType( {}, wasm::Type::none ) },
             { wasm::Name("transfer"), createFunctionType( {}, wasm::Type::none ) },
@@ -1105,9 +1113,9 @@ void BinaryenEngine::verifyContractOfExportCall( wasm::Module &module ) {
                 "Imported function type is missing."
         );
 
-        //HERA_DEBUG << "import name " << import->name << ", function_type:" << function_type->result << ","
-        //           << function_type->params.size() << ", eei_function_type:" << eei_function_type.result << ","
-        //           << eei_function_type.params.size() << "\n";
+        HERA_DEBUG << "import name " << import->name << ", function_type:" << function_type->result << ","
+                   << function_type->params.size() << ", eei_function_type:" << eei_function_type.result << ","
+                   << eei_function_type.params.size() << "\n";
 
         ensureCondition(
                 function_type->structuralComparison(eei_function_type),
