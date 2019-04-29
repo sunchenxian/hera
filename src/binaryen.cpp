@@ -659,13 +659,48 @@ private:
           return wasm::Literal( eeiGetGasLeft() );
       }
 
-      // custom instruction TODO add flowAssetType
+      if (import->base == wasm::Name( "test" )) {
+          heraAssert( arguments.size() == 1, string("Argument count mismatch in: ") + import->base.str );
 
-      // custom instruction TODO add flowCreateAsset
+          uint32_t val = static_cast<uint32_t>( arguments[0].geti32() );
 
-      // custom instruction TODO add flowMintAsset
+          eeiTest( val );
+          return wasm::Literal();
+      }
 
-      // custom instrcution TODO add flowDeployContract
+      // custom instruction TODO add get_asset
+      if (import->base == wasm::Name( "get_asset" )) {
+          heraAssert( arguments.size() == 1, string("Argument count mismatch in: ") + import->base.str );
+
+          uint32_t resultOffset = static_cast<uint32_t>( arguments[0].geti32() );
+
+          eeiGetAsset( resultOffset );
+          return wasm::Literal();
+      }
+
+      // custom instruction TODO add create_asset
+      if (import->base == wasm::Name( "create_asset" )) {
+          heraAssert( arguments.size() == 0, string("Argument count mismatch in: ") + import->base.str );
+
+          eeiCreateAsset();
+          return wasm::Literal();
+      }
+
+      // custom instruction TODO add mintasset
+      if (import->base == wasm::Name( "mint_asset" )) {
+          heraAssert( arguments.size() == 0, string("Argument count mismatch in: ") + import->base.str );
+
+          eeiMintAsset();
+          return wasm::Literal();
+      }
+
+      // custom instrcution TODO add deploy_contract
+      if (import->base == wasm::Name( "deploy_contract" )) {
+          heraAssert( arguments.size() == 0, string("Argument count mismatch in: ") + import->base.str );
+
+          eeiDeployContract();
+          return wasm::Literal();
+      }
 
 
       // TODO need test ???
@@ -1027,7 +1062,15 @@ void BinaryenEngine::verifyContractOfExportCall( wasm::Module &module ) {
             { wasm::Name("origin"), createFunctionType({ wasm::Type::i32 }, wasm::Type::none) },
             { wasm::Name("elog"), createFunctionType({ wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32}, wasm::Type::none) },
             { wasm::Name("create2"), createFunctionType({ wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32 }, wasm::Type::i32) },
-            { wasm::Name("gasleft"), createFunctionType({}, wasm::Type::i64) }
+            { wasm::Name("gasleft"), createFunctionType({}, wasm::Type::i64) },
+
+            // custom instructions
+            { wasm::Name("test"), createFunctionType({ wasm::Type::i32 }, wasm::Type::none) },
+            { wasm::Name("get_asset"), createFunctionType({ wasm::Type::i32 }, wasm::Type::none) },
+            { wasm::Name("create_asset"), createFunctionType( {}, wasm::Type::none ) },
+            { wasm::Name("mint_asset"), createFunctionType( {}, wasm::Type::none ) },
+            { wasm::Name("transfer"), createFunctionType( {}, wasm::Type::none ) },
+            { wasm::Name("deploy_contract"), createFunctionType( {}, wasm::Type::none ) }
     };
 
     for (auto const& import: module.imports) {

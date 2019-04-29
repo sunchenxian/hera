@@ -138,6 +138,13 @@ protected:
   void eeiGetBlockGasLimit(uint32_t dstOffset);
   void eeiPanic( uint32_t payloadOffset, uint32_t payloadLength );
 
+  void eeiTest( uint32_t val );
+  void eeiGetAsset( uint32_t resultOffset );
+  void eeiCreateAsset();
+  void eeiMintAsset();
+  void eeiTransfer();
+  void eeiDeployContract();
+
 private:
   void eeiRevertOrFinish(bool revert, uint32_t offset, uint32_t size);
 

@@ -690,6 +690,39 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
     HERA_DEBUG << depthToString() << " panic payloadOffset " << hex << "0x" << payloadOffset << ", payloadLength " << payloadLength << dec << "\n";
   }
 
+  void EthereumInterface::eeiGetAsset( uint32_t resultOffset ) {
+      HERA_DEBUG << depthToString() << " getAsset " << hex << resultOffset << dec << "\n";
+
+      //takeInterfaceGas(GasSchedule::base);
+
+      //storeAsset(m_msg.asset, resultOffset);
+      m_context->host->get_asset(m_context);
+  }
+
+  void EthereumInterface::eeiCreateAsset() {
+      HERA_DEBUG << depthToString() << "createAsset " << "\n";
+      m_context->host->create_asset(m_context);
+  }
+
+  void EthereumInterface::eeiMintAsset() {
+      HERA_DEBUG << depthToString() << "mintAsset " << "\n";
+      m_context->host->mint_asset(m_context);
+  }
+
+  void EthereumInterface::eeiTransfer() {
+      HERA_DEBUG << depthToString() << "transfer " << "\n";
+      m_context->host->transfer(m_context);
+  }
+
+  void EthereumInterface::eeiDeployContract() {
+      HERA_DEBUG << depthToString() << "deployContract " << "\n";
+      m_context->host->deploy_contract(m_context);
+  }
+
+  void EthereumInterface::eeiTest( uint32_t val ) {
+    HERA_DEBUG << depthToString() << " eeiTest val = " << val << "\n";
+  }
+
   void EthereumInterface::takeGas(int64_t gas)
   {
     // NOTE: gas >= 0 is validated by the callers of this method
