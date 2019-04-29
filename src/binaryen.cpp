@@ -668,22 +668,25 @@ private:
           return wasm::Literal();
       }
 
-      // custom instruction TODO add get_asset
+      // custom instruction
       if (import->base == wasm::Name( "get_asset" )) {
-          heraAssert( arguments.size() == 0, string("Argument count mismatch in: ") + import->base.str );
+          heraAssert( arguments.size() == 1, string("Argument count mismatch in: ") + import->base.str );
 
-          //uint32_t resultOffset = static_cast<uint32_t>( arguments[0].geti32() );
+          uint32_t resultOffset = static_cast<uint32_t>( arguments[0].geti32() );
 
-          eeiGetAsset();
+          eeiGetAsset( resultOffset );
           return wasm::Literal();
       }
 
       // custom instruction TODO add create_asset
       if (import->base == wasm::Name( "create_asset" )) {
-          heraAssert( arguments.size() == 0, string("Argument count mismatch in: ") + import->base.str );
+          heraAssert( arguments.size() == 3, string("Argument count mismatch in: ") + import->base.str );
 
-          eeiCreateAsset();
-          return wasm::Literal();
+          uint32_t assetType  = static_cast<uint32_t>( arguments[0].geti32() );
+          uint32_t assetIndex = static_cast<uint32_t>( arguments[1].geti32() );
+          uint32_t amountOffset = static_cast<uint32_t>( arguments[2].geti32() );
+          
+          return wasm::Literal( eeiCreateAsset( assetType, assetIndex, amountOffset ) );
       }
 
       // custom instruction TODO add mint_asset
@@ -1074,8 +1077,8 @@ void BinaryenEngine::verifyContractOfExportCall( wasm::Module &module ) {
 
             // custom instructions
             { wasm::Name("test"), createFunctionType({ wasm::Type::i32 }, wasm::Type::none) },
-            { wasm::Name("get_asset"), createFunctionType( {}, wasm::Type::none) },
-            { wasm::Name("create_asset"), createFunctionType( {}, wasm::Type::none ) },
+            { wasm::Name("get_asset"), createFunctionType( { wasm::Type::i32 }, wasm::Type::none) },
+            { wasm::Name("create_asset"), createFunctionType( { wasm::Type::i32, wasm::Type::i32, wasm::Type::i32 }, wasm::Type::i32 ) },
             { wasm::Name("mint_asset"), createFunctionType( {}, wasm::Type::none ) },
             { wasm::Name("transfer"), createFunctionType( {}, wasm::Type::none ) },
             { wasm::Name("deploy_contract"), createFunctionType( {}, wasm::Type::none ) }
@@ -1113,7 +1116,7 @@ void BinaryenEngine::verifyContractOfExportCall( wasm::Module &module ) {
                 "Imported function type is missing."
         );
 
-        HERA_DEBUG << "import name " << import->name << ", function_type:" << function_type->result << ","
+        HERA_DEBUG << import->base << ":import name " << import->name << ", function_type:" << function_type->result << ","
                    << function_type->params.size() << ", eei_function_type:" << eei_function_type.result << ","
                    << eei_function_type.params.size() << "\n";
 

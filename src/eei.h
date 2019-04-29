@@ -139,8 +139,8 @@ protected:
   void eeiPanic( uint32_t payloadOffset, uint32_t payloadLength );
 
   void eeiTest( uint32_t val );
-  void eeiGetAsset();
-  void eeiCreateAsset();
+  void eeiGetAsset( uint32_t resultOffset );
+  uint32_t eeiCreateAsset( uint32_t assetType, uint32_t assetIndex, uint32_t amountOffset );
   void eeiMintAsset();
   void eeiTransfer();
   void eeiDeployContract();
