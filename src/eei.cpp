@@ -699,7 +699,7 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
 
   uint32_t EthereumInterface::eeiCreateAsset( uint32_t assetType, uint32_t assetIndex, uint32_t amountOffset ) {
       HERA_DEBUG << depthToString() << "createAsset " << "assetType=" << assetType << ", assetIndex=" << assetIndex << ", amountOffset=" << amountOffset << "\n";
-      evmc_uint256be amount = loadUint256( amountOffset );
+      evmc_uint256be amount = loadBytes32( amountOffset );
 
       evmc_result call_result = m_context->host->create_asset( m_context, assetType, assetIndex, &amount );
 
@@ -723,12 +723,37 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
           default:
               return 1;
       }
+
       return 0;
   }
 
-  void EthereumInterface::eeiMintAsset() {
+  uint32_t EthereumInterface::eeiMintAsset( uint32_t assetIndex, uint32_t amountOffset ) {
       HERA_DEBUG << depthToString() << "mintAsset " << "\n";
-      m_context->host->mint_asset(m_context);
+      evmc_uint256be amount = loadBytes32( amountOffset );
+
+      evmc_result call_result = m_context->host->mint_asset( m_context, assetIndex, &amount );
+
+      if (call_result.output_data) {
+          m_lastReturnData.assign(call_result.output_data, call_result.output_data + call_result.output_size);
+      } else {
+          m_lastReturnData.clear();
+      }
+
+      if (call_result.release)
+          call_result.release(&call_result);
+
+      //heraAssert(call_result.gas_left >= 0, "EVMC returned negative gas left");
+      m_result.gasLeft += call_result.gas_left;
+
+      switch (call_result.status_code) {
+          case EVMC_SUCCESS:
+              return 0;
+          case EVMC_REVERT:
+              return 2;
+          default:
+              return 1;
+      }
+      return 0;
   }
 
   void EthereumInterface::eeiTransfer() {

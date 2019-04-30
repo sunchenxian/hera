@@ -141,7 +141,7 @@ protected:
   void eeiTest( uint32_t val );
   void eeiGetAsset( uint32_t resultOffset );
   uint32_t eeiCreateAsset( uint32_t assetType, uint32_t assetIndex, uint32_t amountOffset );
-  void eeiMintAsset();
+  uint32_t eeiMintAsset( uint32_t assetIndex, uint32_t amountOffset );
   void eeiTransfer();
   void eeiDeployContract();
 
