@@ -668,7 +668,7 @@ private:
           return wasm::Literal();
       }
 
-      // custom instruction
+      // custom instruction get_asset
       if (import->base == wasm::Name( "get_asset" )) {
           heraAssert( arguments.size() == 1, string("Argument count mismatch in: ") + import->base.str );
 
@@ -678,7 +678,7 @@ private:
           return wasm::Literal();
       }
 
-      // custom instruction TODO add create_asset
+      // custom instruction create_asset
       if (import->base == wasm::Name( "create_asset" )) {
           heraAssert( arguments.size() == 3, string("Argument count mismatch in: ") + import->base.str );
 
@@ -689,7 +689,7 @@ private:
           return wasm::Literal( eeiCreateAsset( assetType, assetIndex, amountOffset ) );
       }
 
-      // custom instruction TODO add mint_asset
+      // custom instruction mint_asset
       if (import->base == wasm::Name( "mint_asset" )) {
           heraAssert( arguments.size() == 2, string("Argument count mismatch in: ") + import->base.str );
 
@@ -701,17 +701,27 @@ private:
 
       // custom instruction TODO add transfer
       if (import->base == wasm::Name( "transfer" ) ) {
-          heraAssert( arguments.size() == 0, string("Argument count mismatch in: ") + import->base.str );
+          heraAssert( arguments.size() == 3, string("Argument count mismatch in: ") + import->base.str );
 
-          eeiTransfer();
-          return wasm::Literal();
+          uint32_t addressOffset   = static_cast<uint32_t>( arguments[0].geti32() );
+          uint32_t amountOffset = static_cast<uint32_t>( arguments[1].geti32() );
+          uint32_t assetOffset  = static_cast<uint32_t>( arguments[2].geti32() );
+
+          return wasm::Literal( eeiTransfer( addressOffset, assetOffset, amountOffset ) );
       }
 
-      // custom instrcution TODO add deploy_contract
+      // custom instrcution deploy_contract
       if (import->base == wasm::Name( "deploy_contract" )) {
-          heraAssert( arguments.size() == 0, string("Argument count mismatch in: ") + import->base.str );
+          heraAssert( arguments.size() == 6, string("Argument count mismatch in: ") + import->base.str );
 
-          eeiDeployContract();
+          uint16_t category           = static_cast<uint16_t>( arguments[0].geti32() );
+          uint32_t templateNameOffset = static_cast<uint32_t>( arguments[1].geti32() );
+          uint32_t templateNameLen    = static_cast<uint32_t>( arguments[2].geti32() );
+          uint32_t argsOffset         = static_cast<uint32_t>( arguments[3].geti32() );
+          uint32_t argsLen            = static_cast<uint32_t>( arguments[4].geti32() );
+          uint32_t addressOffset      = static_cast<uint32_t>( arguments[5].geti32() );
+
+          eeiDeployContract( category, templateNameOffset, templateNameLen, argsOffset, argsLen, addressOffset );
           return wasm::Literal();
       }
 
@@ -1058,7 +1068,7 @@ void BinaryenEngine::verifyContractOfExportCall( wasm::Module &module ) {
             { wasm::Name("fetch_input"), createFunctionType({wasm::Type::i32}, wasm::Type::none) },
             { wasm::Name("panic"), createFunctionType({ wasm::Type::i32, wasm::Type::i32 }, wasm::Type::none) },
             { wasm::Name("debug"), createFunctionType({ wasm::Type::i32, wasm::Type::i32 }, wasm::Type::none) },
-            { wasm::Name("ccall"), createFunctionType({ wasm::Type::i64, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32}, wasm::Type::i32) },
+            { wasm::Name("ccall"), createFunctionType({ wasm::Type::i64, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32}, wasm::Type::i32) },
             { wasm::Name("dcall"), createFunctionType({ wasm::Type::i64, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32}, wasm::Type::i32) },
             { wasm::Name("scall"), createFunctionType({ wasm::Type::i64, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32}, wasm::Type::i32) },
             { wasm::Name("value"), createFunctionType({ wasm::Type::i32 }, wasm::Type::none) },
@@ -1082,8 +1092,8 @@ void BinaryenEngine::verifyContractOfExportCall( wasm::Module &module ) {
             { wasm::Name("get_asset"), createFunctionType( { wasm::Type::i32 }, wasm::Type::none) },
             { wasm::Name("create_asset"), createFunctionType( { wasm::Type::i32, wasm::Type::i32, wasm::Type::i32 }, wasm::Type::i32 ) },
             { wasm::Name("mint_asset"), createFunctionType( { wasm::Type::i32, wasm::Type::i32 }, wasm::Type::i32 ) },
-            { wasm::Name("transfer"), createFunctionType( {}, wasm::Type::none ) },
-            { wasm::Name("deploy_contract"), createFunctionType( {}, wasm::Type::none ) }
+            { wasm::Name("transfer"), createFunctionType( { wasm::Type::i32, wasm::Type::i32, wasm::Type::i32 }, wasm::Type::i32 ) },
+            { wasm::Name("deploy_contract"), createFunctionType( {wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32, wasm::Type::i32}, wasm::Type::none ) }
     };
 
     for (auto const& import: module.imports) {

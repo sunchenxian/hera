@@ -142,8 +142,8 @@ protected:
   void eeiGetAsset( uint32_t resultOffset );
   uint32_t eeiCreateAsset( uint32_t assetType, uint32_t assetIndex, uint32_t amountOffset );
   uint32_t eeiMintAsset( uint32_t assetIndex, uint32_t amountOffset );
-  void eeiTransfer();
-  void eeiDeployContract();
+  uint32_t eeiTransfer( uint32_t addressOffset, uint32_t assetOffset, uint32_t amountOffset );
+  uint32_t eeiDeployContract( uint16_t category, uint32_t templateNameOffset, uint32_t templateNameLen, uint32_t  argsOffset, uint32_t argsLen, uint32_t addressOffset );
 
 private:
   void eeiRevertOrFinish(bool revert, uint32_t offset, uint32_t size);

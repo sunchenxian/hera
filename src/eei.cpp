@@ -669,8 +669,10 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
     uint32_t inputSize = static_cast<uint32_t>(m_msg.input_size);
     safeChargeDataCopy( inputSize, GasSchedule::verylow );
 
+    HERA_DEBUG << "eeiFetchInput input_size=" << inputSize << "\n";
     vector<uint8_t> input( m_msg.input_data, m_msg.input_data + inputSize );
     storeMemory( input, 0, inputOffset, inputSize );
+    HERA_DEBUG << "eeiFetchInput input " << input.size() << " " << inputOffset << " " << inputSize << "\n";
   }
 
   void EthereumInterface::eeiGetValue(uint32_t resultOffset) {
@@ -723,8 +725,6 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
           default:
               return 1;
       }
-
-      return 0;
   }
 
   uint32_t EthereumInterface::eeiMintAsset( uint32_t assetIndex, uint32_t amountOffset ) {
@@ -753,17 +753,54 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
           default:
               return 1;
       }
-      return 0;
   }
 
-  void EthereumInterface::eeiTransfer() {
+  uint32_t EthereumInterface::eeiTransfer( uint32_t addressOffset, uint32_t assetOffset, uint32_t amountOffset ) {
       HERA_DEBUG << depthToString() << "transfer " << "\n";
-      m_context->host->transfer(m_context);
+
+      // TODO gas is ???
+      int64_t gas = m_result.gasLeft;
+      uint32_t dataOffset   = 0;
+      uint32_t dataLength   = 0;
+      return eeiCall( EEICallKind::Call, gas, addressOffset, amountOffset, assetOffset, dataOffset, dataLength );
   }
 
-  void EthereumInterface::eeiDeployContract() {
+  uint32_t EthereumInterface::eeiDeployContract( uint16_t category, uint32_t templateNameOffset, uint32_t templateNameLen, uint32_t argsOffset, uint32_t argsLen, uint32_t addressOffset ) {
       HERA_DEBUG << depthToString() << "deployContract " << "\n";
-      m_context->host->deploy_contract(m_context);
+
+      ensureSourceMemoryBounds( templateNameOffset, templateNameLen );
+      vector<uint8_t> templateName( templateNameLen );
+      loadMemory( templateNameOffset, templateName, templateNameLen );
+
+      ensureSourceMemoryBounds( argsOffset, argsLen );
+      vector<uint8_t> args( argsLen );
+      loadMemory( argsOffset, args, argsLen );
+
+      evmc_result create_result = m_context->host->deploy_contract( m_context, category, templateName.data(), templateNameLen, args.data(), argsLen );
+
+      heraAssert(create_result.gas_left >= 0, "EVMC returned negative gas left");
+      m_result.gasLeft += create_result.gas_left;
+
+      if ( create_result.status_code == EVMC_SUCCESS ) {
+          storeAddress( create_result.create_address, addressOffset );
+          m_lastReturnData.clear();
+      } else if ( create_result.output_data ) {
+          m_lastReturnData.assign( create_result.output_data, create_result.output_data + create_result.output_size );
+      } else {
+          m_lastReturnData.clear();
+      }
+
+      if (create_result.release)
+          create_result.release(&create_result);
+
+      switch (create_result.status_code) {
+          case EVMC_SUCCESS:
+              return 0;
+          case EVMC_REVERT:
+              return 2;
+          default:
+              return 1;
+      }
   }
 
   void EthereumInterface::eeiTest( uint32_t val ) {
@@ -834,7 +871,7 @@ bool exceedsUint128(evmc_uint256be const& value) noexcept
     ensureCondition(dst.size() >= length, InvalidMemoryAccess, "Out of bounds (destination) memory copy.");
 
     if (!length)
-      HERA_DEBUG << "Zero-length3 memory load from offset 0x" << hex << srcOffset << dec <<"\n";
+      HERA_DEBUG << "Zero-length3 memory load from offset 0x" << hex << srcOffset << " " << length << dec <<"\n";
 
     for (uint32_t i = 0; i < length; ++i) {
       dst[i] = memoryGet(srcOffset + i);
