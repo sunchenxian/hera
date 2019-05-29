@@ -20,3 +20,5 @@ CTestTestfile.cmake
 
 # Vim swap files
 **/*.swp
+
+cmake-build-debug
